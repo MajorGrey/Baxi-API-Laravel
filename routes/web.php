@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/', [Controller::class, 'index']);
+Route::get('/dstv', [Controller::class, 'dstv']);
+Route::post('/dstv/pay', [Controller::class, 'dstv_pay']);
+Route::get('/dstv/{id}', [Controller::class, 'dstv_id']);
+Route::get('/ekedc', [Controller::class, 'ekedc']);
+Route::get('/ekedc/{id}', [Controller::class, 'ekedc_id']);
