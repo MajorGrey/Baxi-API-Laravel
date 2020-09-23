@@ -23,4 +23,5 @@ Route::get('/dstv', [Controller::class, 'dstv']);
 Route::post('/dstv/pay', [Controller::class, 'dstv_pay']);
 Route::get('/dstv/{id}', [Controller::class, 'dstv_id']);
 Route::get('/ekedc', [Controller::class, 'ekedc']);
-Route::get('/ekedc/{id}', [Controller::class, 'ekedc_id']);
+Route::post('/ekedc/pay', [Controller::class, 'ekedc_pay']);
+Route::get('/ekedc/{id}/{no}', [Controller::class, 'ekedc_id']);

@@ -12,43 +12,6 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function hash_digest()
-    {
-        $request_type = "GET";
-        $endpoint = "/api/baxipay/superagent/account/balance";
-        $request_date = "Thu, 19 Dec 2019 17:40:26 GMT";
-        $user_secret = "YOUR_USER_SECRET";
-        $json_payload = '{ "name":"tayo" }';
-        $encoded_payload_hash = "";
-
-        // 1. CONVERT DATE TO UNIX TIMESTAMP
-        $timestamp = strtotime($request_date);
-
-        if (!empty($json_payload)) {
-            // 2. DO A SHA256 OF YOUR JSON PAYLOAD (IF AVAILABLE)
-            $payload_hash = hash('sha256', $json_payload, $raw_output = TRUE);
-
-            // 3. ENCODE THE PAYLOAD HASH WITH BASE-64
-            $encoded_payload_hash = base64_encode($payload_hash);
-        } else {
-            $encoded_payload_hash = ""; // NO PAYLOAD
-        }
-
-        // 4. CREATE A SECURITY STRING FOR THIS REQUEST
-        $signed_string = $request_type . $endpoint . $timestamp . $encoded_payload_hash;
-
-        // 5. DO A UTF-8 ENCODE OF THE SECURITY STRING
-        $encoded_signed_string = utf8_encode($signed_string);
-
-        // 6. SIGN USING HMAC-SHA1: Key = USER_SECRET, Message = ENCODED SIGNED STRING
-        $hash_signature = hash_hmac("sha1", $encoded_signed_string, $user_secret, $raw_output = TRUE);
-
-        // 7. CONVERT HASH SIGNATURE TO BASE 64
-        $final_signature = base64_encode($hash_signature);
-
-        return $final_signature;
-    }
-
     public function index()
     {
         return view('index');
@@ -97,7 +60,7 @@ class Controller extends BaseController
             'agentId' => env('BAXI_ID'),
         ];
         $response = $this->api($url, $data);
-        return view('dstv.status', ['data' => $response]);
+        return view('status', ['data' => $response]);
         // return $response;
 
     }
@@ -106,9 +69,31 @@ class Controller extends BaseController
         return view('ekedc.form');
     }
 
-    public function ekedc_id($id){
-        return view('ekedc.form', ['id' => $id]);
+    public function ekedc_id($id, $number){
 
+        $url='services/electricity/verify';
+        $data = [
+            'account_number' => $number,
+            'service_type' => $id,
+
+        ];
+        $response = $this->api($url, $data);
+        return $response;
+    }
+
+    public function ekedc_pay(Request $req){
+        $url='services/electricity/request';
+        $data = [
+            'phone' => $req->phone,
+            'amount' => $req->amount,
+            'account_number' => $req->account_number,
+            'service_type' => $req->service_type,
+            'agentReference' => 'baxi-api-'.rand(0,time()).rand(0,1000),
+            'agentId' => env('BAXI_ID'),
+        ];
+        $response = $this->api($url, $data);
+        return view('status', ['data' => $response]);
+        // return $response;
     }
 
     public function api($url, $data){
@@ -130,6 +115,23 @@ class Controller extends BaseController
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data_string );
         //set headers_list
         if($url == 'services/multichoice/request'){
+            $headers = [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'Baxi-date: '.strtotime("now"),
+                'x-api-key: '.$api_key,
+
+            ];
+        }else if($url == 'services/multichoice/request'){
+            $headers = [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'Baxi-date: '.strtotime("now"),
+                'x-api-key: '.$api_key,
+
+            ];
+
+        }else if($url == 'services/electricity/request'){
             $headers = [
                 'Accept: application/json',
                 'Content-Type: application/json',

@@ -2,6 +2,10 @@
 @section('content')
     <div class="container">
         <div class="mt-5 mx-auto w-50">
+            <div class="text-center mb-3">
+                <img src="/img/DStv_Logo_2012.png" class="img-fluid rounded" style="height: 100px;" alt="...">
+                <br>
+            </div>
             <form action="/dstv/pay" method="POST">
                 @csrf
                 <div class="form-group">
